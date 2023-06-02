@@ -100,7 +100,7 @@ def main():
                                     #  root_certificates=Path(".cache/certificates/ca.crt").read_bytes(),
                                      )
     else:
-    # client does not exits
+    # client does not exit
         print("Error: client does not exit")    
 
 if __name__ == "__main__":

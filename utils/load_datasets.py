@@ -33,3 +33,4 @@ def load_datasets(cid, test_size=0.2):
     x_train, y_train, x_test, y_test, test_index = minMaxScaler(X, y, test_size)
 
     return x_train, y_train, x_test, y_test
+

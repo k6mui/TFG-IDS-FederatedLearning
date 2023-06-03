@@ -1,9 +1,30 @@
+from typing import Optional, Dict, Tuple
 import flwr as fl
-from utils import model, load_datasets
+import tensorflow as tf
+from utils import test, model, load_datasets
 from pathlib import Path
+from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, precision_score, f1_score, matthews_corrcoef, roc_auc_score
+
 
 # Ip of the central Server
 serverAdress = "127.0.0.1:4687"
+# Number of features 
+NUM_FEATURES = 39
+
+def eval_learning(model, X_test, Y_test):
+  bce = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+  logits = model.predict(X_test, batch_size=32, verbose=1)
+  y_pred = logits
+  y_pred[y_pred <= 0.5] = 0.
+  y_pred[y_pred > 0.5] = 1.
+  tn, fp, fn, tp = confusion_matrix(Y_test, y_pred).ravel()
+  loss = bce(Y_test, logits.reshape((len(logits),))).numpy()
+  acc = accuracy_score(y_pred, Y_test)
+  pre = precision_score(y_pred, Y_test,zero_division = 0)
+  rec = recall_score(y_pred, Y_test, zero_division = 0)
+  f1s = f1_score(y_pred, Y_test, zero_division = 0)
+    
+  return loss, acc, pre, rec, f1s, tn, fp, fn, tp
 
 def average_metrics(metrics):
     accuracies = [metric["acc"] for _, metric in metrics]
@@ -20,22 +41,31 @@ def average_metrics(metrics):
 
     return {"acc": accuracies, "rec": recalls, "prec": precisions, "f1": f1s}
 
+def evaluate_DNN_CL(
+    server_round: int,
+    parameters: fl. common.NDArrays,
+    config: Dict[str, fl.common.Scalar],
+) -> Optional[Tuple[float, Dict[str, fl.common.Scalar]]]:
+    net = model.create_NN(39)
+    X_test_CL, y_test_CL = test.getTest()
+    net.set_weights(parameters) # Update model with the latest parameters
+    loss, accuracy, precision, recall, f1score,tn, fp, fn, tp  = eval_learning(net, X_test_CL, y_test_CL)
+    print(f"@@@@@@ Server-side evaluation loss {loss} / accuracy {accuracy} / f1score {f1score} @@@@@@")
+    return loss, {"accuracy": accuracy,"precision": precision,"recall": recall,"f1score": f1score, "tn": tn, "fp": fp, "fn": fn, "tp": tp}
 
 def main():    
-    sample_silo = "./datasets/sampled/nb15_sampled.csv"
-    x_train, _, _, _ = load_datasets.load_datasets(sample_silo)
-    
-    params = model.create_NN(x_train.shape[1]).get_weights()
-
-    del x_train # release memory
+  
+    params = model.create_NN(NUM_FEATURES).get_weights()
 
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=1,
         fraction_evaluate=1,
+        min_fit_clients=3,  
+        min_evaluate_clients=3,  
         min_available_clients=3,
         evaluate_metrics_aggregation_fn=average_metrics,
-        # eval_fn=centralized_eval,
+        evaluate_fn=evaluate_DNN_CL,
         # on_fit_config_fn=fit_config,
         initial_parameters=fl.common.ndarrays_to_parameters(params)
 
@@ -57,7 +87,7 @@ def main():
     # Start Flower server
     fl.server.start_server(
             server_address=serverAdress,
-            config=fl.server.ServerConfig(num_rounds=10),
+            config=fl.server.ServerConfig(num_rounds=30),
             strategy=strategy,
     #     ,certificates=(
     #         # Server will require a tuple of 3 certificates

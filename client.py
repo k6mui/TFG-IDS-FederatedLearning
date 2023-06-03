@@ -5,28 +5,12 @@ from pathlib import Path
 import os
 import sys
 import numpy as np
-from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, precision_score, f1_score, matthews_corrcoef, roc_auc_score
 from utils import model, load_datasets
-from server import serverAdress
+from server import serverAdress, eval_learning
 
 # Make TensorFlow logs less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
-
-def eval_learning(model, X_test, Y_test):
-  bce = tf.keras.losses.BinaryCrossentropy(from_logits=True)
-  logits = model.predict(X_test, batch_size=32, verbose=1)
-  y_pred = logits
-  y_pred[y_pred <= 0.5] = 0.
-  y_pred[y_pred > 0.5] = 1.
-  tn, fp, fn, tp = confusion_matrix(Y_test, y_pred).ravel()
-  loss = bce(Y_test, logits.reshape((len(logits),))).numpy()
-  acc = accuracy_score(y_pred, Y_test)
-  pre = precision_score(y_pred, Y_test,zero_division = 0)
-  rec = recall_score(y_pred, Y_test, zero_division = 0)
-  f1s = f1_score(y_pred, Y_test, zero_division = 0)
-    
-  return loss, acc, pre, rec, f1s, tn, fp, fn, tp
 
 class FlwrClient(fl.client.NumPyClient):
     # Implement flower client extending class NumPyClient

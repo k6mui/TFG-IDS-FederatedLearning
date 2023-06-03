@@ -3,7 +3,7 @@ from utils import model, load_datasets
 from pathlib import Path
 
 # Ip of the central Server
-serverAdress = "34.175.241.238:4687"
+serverAdress = "127.0.0.1:4687"
 
 def average_metrics(metrics):
     accuracies = [metric["acc"] for _, metric in metrics]

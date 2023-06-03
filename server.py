@@ -2,6 +2,9 @@ import flwr as fl
 from utils import model, load_datasets
 from pathlib import Path
 
+# Ip of the central Server
+serverAdress = "34.175.241.238:4687"
+
 def average_metrics(metrics):
     accuracies = [metric["acc"] for _, metric in metrics]
     recalls = [metric["rec"] for _, metric in metrics]
@@ -53,7 +56,7 @@ def main():
 
     # Start Flower server
     fl.server.start_server(
-            server_address="0.0.0.0:4687",
+            server_address=serverAdress,
             config=fl.server.ServerConfig(num_rounds=10),
             strategy=strategy,
     #     ,certificates=(

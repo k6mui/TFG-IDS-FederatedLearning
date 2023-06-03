@@ -7,6 +7,7 @@ import sys
 import numpy as np
 from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, precision_score, f1_score, matthews_corrcoef, roc_auc_score
 from utils import model, load_datasets
+from server import serverAdress
 
 # Make TensorFlow logs less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
@@ -83,19 +84,19 @@ def main():
     # Start Flower client		
     if sys.argv[1] == "1":
         client = FlwrClient("./datasets/sampled/cicids_sampled.csv")
-        fl.client.start_numpy_client(server_address="127.0.0.1:4687", 
+        fl.client.start_numpy_client(server_address=serverAdress, 
                                      client=client,
                                     #  root_certificates=Path(".cache/certificates/ca.crt").read_bytes()
                                      )
     elif sys.argv[1] == "2":
         client = FlwrClient("./datasets/sampled/nb15_sampled.csv")
-        fl.client.start_numpy_client(server_address="127.0.0.1:4687", 
+        fl.client.start_numpy_client(server_address=serverAdress, 
                                      client=client,
                                     #  root_certificates=Path(".cache/certificates/ca.crt").read_bytes(),
                                      )
     elif sys.argv[1] == "3":
         client = FlwrClient("./datasets/sampled/toniot_sampled.csv")
-        fl.client.start_numpy_client(server_address="127.0.0.1:4687", 
+        fl.client.start_numpy_client(server_address=serverAdress, 
                                      client=client,
                                     #  root_certificates=Path(".cache/certificates/ca.crt").read_bytes(),
                                      )

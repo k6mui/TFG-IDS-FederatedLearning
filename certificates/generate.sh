@@ -40,7 +40,7 @@ openssl req \
     -new \
     -key $CERT_DIR/server.key \
     -out $CERT_DIR/server.csr \
-    -config ./certificates/certificate.conf
+    -config ./certificate.conf
 
 # Generate a certificate for the server
 openssl x509 \
@@ -52,5 +52,5 @@ openssl x509 \
     -out $CERT_DIR/server.pem \
     -days 365 \
     -sha256 \
-    -extfile ./certificates/certificate.conf \
+    -extfile ./certificate.conf \
     -extensions req_ext

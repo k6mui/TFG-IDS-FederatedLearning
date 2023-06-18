@@ -1,15 +1,43 @@
 from typing import Optional, Dict, Tuple
 import flwr as fl
+import numpy as np
 import tensorflow as tf
-from utils import test, model, load_datasets
+from utils import test,  load_datasets
+from models import dnn
 from pathlib import Path
-from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, precision_score, f1_score, matthews_corrcoef, roc_auc_score
+from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, precision_score, f1_score
 
 
 # Ip of the central Server
 serverAdress = "127.0.0.1:4687"
 # Number of features 
 NUM_FEATURES = 39
+# Use EFC
+with_efc = False
+
+nrounds = 50
+
+
+# # # For Autoencoders
+# def anomalyDetection(losses, threshold):
+#     predictions = np.zeros(len(losses))
+#     for i, mse in enumerate(losses):
+#         if mse > threshold:
+#             predictions[i] = 1
+#         else:
+#             predictions[i] = 0
+
+#     return predictions
+
+# def eval_learningAnDet(Y_test, y_pred):
+#   acc = accuracy_score(Y_test, y_pred)
+#   tn, fp, fn, tp = confusion_matrix(Y_test, y_pred).ravel()
+#   acc = accuracy_score(y_pred, Y_test)
+#   pre = precision_score(y_pred, Y_test,zero_division = 0)
+#   rec = recall_score(y_pred, Y_test, zero_division = 0)
+#   f1s = f1_score(y_pred, Y_test, zero_division = 0)
+    
+#   return acc, pre, rec, f1s, tn, fp, fn, tp
 
 def eval_learning(model, X_test, Y_test):
   bce = tf.keras.losses.BinaryCrossentropy(from_logits=True)
@@ -46,7 +74,7 @@ def evaluate_DNN_CL(
     parameters: fl. common.NDArrays,
     config: Dict[str, fl.common.Scalar],
 ) -> Optional[Tuple[float, Dict[str, fl.common.Scalar]]]:
-    net = model.create_NN(39)
+    net = dnn.create_NN(39)
     X_test_CL, y_test_CL = test.getTest()
     net.set_weights(parameters) # Update model with the latest parameters
     loss, accuracy, precision, recall, f1score,tn, fp, fn, tp  = eval_learning(net, X_test_CL, y_test_CL)
@@ -54,8 +82,11 @@ def evaluate_DNN_CL(
     return loss, {"accuracy": accuracy,"precision": precision,"recall": recall,"f1score": f1score, "tn": tn, "fp": fp, "fn": fn, "tp": tp}
 
 def main():    
-  
-    params = model.create_NN(NUM_FEATURES).get_weights()
+    if with_efc:
+        print("uso EFC")
+        params = dnn.create_NN(NUM_FEATURES + 1).get_weights()  # Additional Feature if using EFC
+    else:
+        params = dnn.create_NN(NUM_FEATURES).get_weights()
 
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
@@ -65,12 +96,12 @@ def main():
         min_evaluate_clients=3,  
         min_available_clients=3,
         evaluate_metrics_aggregation_fn=average_metrics,
-        evaluate_fn=evaluate_DNN_CL,
+        # evaluate_fn=evaluate_DNN_CL,
         # on_fit_config_fn=fit_config,
         initial_parameters=fl.common.ndarrays_to_parameters(params)
 
         # FedProx Parameters
-        # proximal_mu  = 1
+        # proximal_mu  = 0.1
         
         # FedAvgM Parameters
         # server_learning_rate=1.0,
@@ -87,14 +118,14 @@ def main():
     # Start Flower server
     fl.server.start_server(
             server_address=serverAdress,
-            config=fl.server.ServerConfig(num_rounds=30),
+            config=fl.server.ServerConfig(num_rounds=nrounds),
             strategy=strategy,
-    #     ,certificates=(
-    #         # Server will require a tuple of 3 certificates
-    #         Path(".cache/certificates/ca.crt").read_bytes(),
-    #         Path(".cache/certificates/server.pem").read_bytes(),
-    #         Path(".cache/certificates/server.key").read_bytes(),
-    # )
+        certificates=(
+            # Server will require a tuple of 3 certificates
+            Path("./certificates/cache/certificates/ca.crt").read_bytes(),
+            Path("./certificates/cache/certificates/server.pem").read_bytes(),
+            Path("./certificates/cache/certificates/server.key").read_bytes(),
+    )
     )
 
 

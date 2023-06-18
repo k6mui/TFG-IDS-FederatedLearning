@@ -5,6 +5,8 @@ from sklearn.preprocessing import MinMaxScaler
 seed=27
 
 delete_features = ['IPV4_SRC_ADDR', 'L4_SRC_PORT', 'IPV4_DST_ADDR', 'L4_DST_PORT', 'Attack', 'Dataset', 'Label']
+# delete_features = ['IPV4_SRC_ADDR', 'L4_SRC_PORT', 'IPV4_DST_ADDR', 'L4_DST_PORT', 'Attack', 'Label']
+
 
 def remove_features(df, feats=delete_features): # -> X, y (dataframes)
     X = df.drop(columns=feats)

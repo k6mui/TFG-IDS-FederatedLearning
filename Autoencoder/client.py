@@ -32,10 +32,10 @@ class FlwrClient(fl.client.NumPyClient):
 
         self.loss = 0
         self.threshold = 0
-        self.trainSamples = self.x_train[self.y_train == 0] # only benign samples
-        idx = int(self.trainSamples.shape[0] * 0.9)
-        self.val_data = self.trainSamples[idx:]  # holdout validation set for threshold calculation
-        self.train_data = self.trainSamples[:idx]  # reduced self.x_train (only benign wo val_data)
+        self.trainBenign = self.x_train[self.y_train == 0] # only benign samples
+        idx = int(self.trainBenign.shape[0] * 0.9)
+        self.valid_data = self.trainBenign[idx:]  # holdout validation set for threshold calculation
+        self.train_data = self.trainBenign[:idx]  # reduced self.x_train (only benign wo val_data)
 
     def get_parameters(self):
         print(f"============Client {self.cid} GET_PARAMETERS===========")
@@ -66,8 +66,8 @@ class FlwrClient(fl.client.NumPyClient):
         print(f"===========Client {self.cid} EVALUATE================")
         self.set_parameters(parameters)
 
-        val_inference = self.model.predict(self.val_data)
-        val_losses = tf.keras.losses.mae(self.val_data, val_inference)
+        val_inference = self.model.predict(self.valid_data)
+        val_losses = tf.keras.losses.mae(self.valid_data, val_inference)
 
         #Threshold Calculation#
         self.threshold = np.mean(val_losses) 

@@ -4,38 +4,37 @@ from statsmodels.formula.api import ols
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import MinMaxScaler
 
-# Crea una instancia del codificador de etiquetas y MinMaxScaler
+# Create an instance of LabelEncoder and MinMaxScaler
 label_encoder = LabelEncoder()
 scaler = MinMaxScaler()
 
-# Características para eliminar
+# Features to be deleted
 delete_features = ['IPV4_SRC_ADDR', 'L4_SRC_PORT', 'IPV4_DST_ADDR', 'L4_DST_PORT', 'Dataset']
 
-# Rutas de los archivos CSV del escenario heterogéneo
+# Paths to the CSV files for the heterogeneous scenario
 # paths = [
 #     "../datasets/sampled/cicids_sampled.csv",
 #     "../datasets/sampled/nb15_sampled.csv",
 #     "../datasets/sampled/toniot_sampled.csv"
 # ]
 
-# Rutas de los archivos CSV del escenario no heterogéneo
+# Paths to the CSV files for the non-heterogeneous scenario
 paths = [
     "../datasets/balanced/first_balanced.csv",
     "../datasets/balanced/second_balanced.csv",
     "../datasets/balanced/third_balanced.csv"
 ]
 
-
-# Nombres de los conjuntos de datos para la nueva columna 'dataset'
+# Dataset names for the new 'dataset' column
 dataset_names = ['CIC', 'NB15', 'TONIOT']
 
-# Número de filas para muestrear de cada DataFrame
-numero_filas_muestreo = 100000
+# Number of rows to sample from each DataFrame
+numero_filas_muestreo = 500000
 
-# Lista para almacenar los dataframes muestreados
+# List to store the sampled DataFrames
 sampled_dfs = []
 
-# Cargar los archivos CSV, muestrear filas, eliminar características innecesarias y añadir la columna 'dataset'
+# Load the CSV files, sample rows, delete unnecessary features, and add the 'dataset' column
 for path, dataset_name in zip(paths, dataset_names):
     df = pd.read_csv(path, low_memory=False)
     df_sampled = df.sample(n=numero_filas_muestreo, random_state=82)
@@ -43,41 +42,42 @@ for path, dataset_name in zip(paths, dataset_names):
     df_sampled['dataset'] = dataset_name
     sampled_dfs.append(df_sampled)
 
-# Combina los tres dataframes muestreados en uno solo
+# Combine the three sampled DataFrames into one
 df_total = pd.concat(sampled_dfs)
 
-# Codificar la columna 'Attack' y luego eliminarla
+# Encode the 'Attack' column and then drop it
 df_total['Attack_encoded'] = label_encoder.fit_transform(df_total['Attack'])
 df_total = df_total.drop('Attack', axis=1)
 
-# Identificar las columnas numéricas y categóricas
+# Identify the numeric and categorical columns
 num_cols = df_total.select_dtypes(include=['float64', 'int64']).columns
 cat_cols = df_total.select_dtypes(include=['object']).columns
 
-# Aplicar MinMaxScaler solo a las columnas numéricas
+# Apply MinMaxScaler only to the numeric columns
 df_total[num_cols] = scaler.fit_transform(df_total[num_cols])
 
-# Imprimir las características del dataframe transformado
-print(f"Características: {df_total.columns.tolist()}")
+# Print the features of the transformed dataframe
+print(f"Features: {df_total.columns.tolist()}")
 
-# Lista para almacenar los valores F
+# List to store the F-values
 f_values = []
 
-# Realizar ANOVA para cada característica numérica
-for caracteristica in num_cols:
-    modelo = ols(f'{caracteristica} ~ C(dataset)', data=df_total).fit()
-    resultado_anova = sm.stats.anova_lm(modelo, typ=2)
-    f_value = resultado_anova.loc['C(dataset)', 'F']
+# Perform ANOVA for each numeric feature
+for feature in num_cols:
+    model = ols(f'{feature} ~ C(dataset)', data=df_total).fit()
+    anova_result = sm.stats.anova_lm(model, typ=2)
+    f_value = anova_result.loc['C(dataset)', 'F']
     
-    print(f"Valor F para {caracteristica}: {f_value}\n---\n")
+    print(f"F-value for {feature}: {f_value}\n---\n")
     
-    # Añadir el valor F a la lista
+    # Add the F-value to the list
     f_values.append(f_value)
 
-# Calcular la media de los valores F
+# Calculate the mean of the F-values
 f_mean = sum(f_values) / len(f_values)
 
-print(f"La media de los valores F para este escenario es: {f_mean}")
+print(f"The mean of the F-values for this scenario is: {f_mean}")
+
 
 
 

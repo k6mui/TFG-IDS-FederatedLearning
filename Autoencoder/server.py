@@ -13,7 +13,7 @@ import math
 import matplotlib.pyplot as plt
 
 # Ip of the central Server
-serverAdress = "127.0.0.1:4687"
+serverAdress = "Internal IP of VM instances"
 
 # Number of features 
 NUM_FEATURES = 39

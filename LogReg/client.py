@@ -7,9 +7,12 @@ import sys
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
-from server import eval_learning, serverAdress
+from server import eval_learning
 import regUtils
 from utils import load_datasets
+
+# External IP of VM Instance
+serverAdress = ""  # e.g. 34.125.18.50
 
 class FlwrClient(fl.client.NumPyClient):
     # Implement flower client extending class NumPyClient

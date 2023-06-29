@@ -8,7 +8,10 @@ import numpy as np
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../")))
 from utils import load_datasets
 from models import dnn
-from server import serverAdress, eval_learning
+from server import eval_learning
+
+# External IP of VM Instance
+serverAdress = ""  # e.g. 34.125.18.50
 
 # Make TensorFlow logs less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"

@@ -9,10 +9,13 @@ import numpy as np
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../")))
 from utils import load_datasets
 from models import AE
-from server import serverAdress, eval_learningAnDet, anomalyDetection
+from server import eval_learningAnDet, anomalyDetection
 
 # Make TensorFlow logs less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+
+# External IP of VM Instance
+serverAdress = ""  # e.g. 34.125.18.50
 
 # def calculate_MAE(x, x_hat):
 #     losses = np.mean((x - x_hat)**2, axis=1)  # MSE

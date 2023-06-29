@@ -1,18 +1,28 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import LabelEncoder
+
 
 seed=27
+label_encoder = LabelEncoder()
 
 delete_features = ['IPV4_SRC_ADDR', 'L4_SRC_PORT', 'IPV4_DST_ADDR', 'L4_DST_PORT', 'Attack', 'Dataset', 'Label']
 # delete_features = ['IPV4_SRC_ADDR', 'L4_SRC_PORT', 'IPV4_DST_ADDR', 'L4_DST_PORT', 'Attack', 'Label']
 
 
 def remove_features(df, feats=delete_features): # -> X, y (dataframes)
-    df.dropna(inplace=True)
     X = df.drop(columns=feats)
     y = df['Label']
     return X, y
+
+def remove_featuresMulti(df, feats=delete_features): # -> X, y (dataframes)
+    X = df.drop(columns=feats)
+    df['Attack_encoded'] = label_encoder.fit_transform(df['Attack'])
+    df = df.drop('Attack', axis=1)
+    y = df['Attack_encoded']
+    return X, y
+
 
 def minMaxScaler(X, y, test_size): # -> train, test and index
     scaler = MinMaxScaler()

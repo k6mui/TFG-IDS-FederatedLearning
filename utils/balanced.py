@@ -1,74 +1,47 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
+import os
 
-test_size=0.2
-scaler = MinMaxScaler()
-path1="../datasets/sampled/cicids_sampled.csv"
-path2="../datasets/sampled/nb15_sampled.csv"
-path3="../datasets/sampled/toniot_sampled.csv"
+def load_and_combine_datasets(paths):
+    try:
+        dataframes = [pd.read_csv(path, low_memory=True) for path in paths]
+        df_total = pd.concat(dataframes)
+        return df_total
+    except FileNotFoundError as e:
+        print(f"Uno de los archivos no se encuentra en la ruta especificada: {e}")
+        return None
 
-def rebalance_dataframe(df, label_col='Label', majority_class=0, minority_class=1, majority_target=700000, minority_target=300000):
-    majority_df = df[df[label_col] == majority_class]
-    minority_df = df[df[label_col] == minority_class]
+def split_dataset(df, label_column='Attack'):
+    X = df.drop(label_column, axis=1)
+    y = df[label_column]
 
-    # Reducir o mantener la clase mayoritaria
-    if len(majority_df) > majority_target:
-        majority_df = majority_df.sample(n=majority_target, random_state=42)
-    else:
-        majority_df = majority_df.sample(n=majority_target, replace=True, random_state=42)
+    # Divide el dataset en dos partes (66% para el conjunto temporal, 34% para el tercer conjunto)
+    X_temp, X_third, y_temp, y_third = train_test_split(X, y, test_size=0.33, stratify=y, random_state=42)
 
-    # Reducir, mantener o duplicar la clase minoritaria
-    if len(minority_df) > minority_target:
-        minority_df = minority_df.sample(n=minority_target, random_state=42)
-    else:
-        minority_df = minority_df.sample(n=minority_target, replace=True, random_state=42)
+    # Divide el conjunto temporal en dos para crear los primeros dos conjuntos
+    X_first, X_second, y_first, y_second = train_test_split(X_temp, y_temp, test_size=0.5, stratify=y_temp, random_state=42)
 
-    new_df = pd.concat([majority_df, minority_df])
-    new_df = new_df.sample(frac=1, random_state=42)  # Mezcla los datos
+    return pd.concat([X_first, y_first], axis=1), pd.concat([X_second, y_second], axis=1), pd.concat([X_third, y_third], axis=1)
 
-    return new_df
+def save_datasets(datasets, paths):
+    for df, path in zip(datasets, paths):
+        df.to_csv(path, index=False)
 
+def print_label_distribution(datasets, names):
+    for df, name in zip(datasets, names):
+        print(f"\nDistribución de etiquetas en el DataFrame {name}:\n")
+        print(df['Attack'].value_counts().to_string())
 
-def balance(path1=path1,path2=path2,path3=path3):
-
-    df_cic = pd.read_csv(path1, low_memory=True)
-    df_nb15 = pd.read_csv(path2, low_memory=True)
-    df_toniot = pd.read_csv(path3, low_memory=True)
-
-    print(">> \033[1m {} \033[0m - Total samples: {}, Benign: {}, Malicious: {}, Labels: {}"\
-        .format(path1, df_cic.shape[0], sum(df_cic.Label == 0), \
-        sum(df_cic.Label == 1), sorted(list(df_cic.Attack.unique().astype(str)))))
-    
-    print(">> \033[1m {} \033[0m - Total samples: {}, Benign: {}, Malicious: {}, Labels: {}"\
-        .format(path2, df_nb15.shape[0], sum(df_nb15.Label == 0), \
-        sum(df_nb15.Label == 1), sorted(list(df_nb15.Attack.unique().astype(str)))))
-    
-    print(">> \033[1m {} \033[0m - Total samples: {}, Benign: {}, Malicious: {}, Labels: {}"\
-        .format(path3, df_toniot.shape[0], sum(df_toniot.Label == 0), \
-        sum(df_toniot.Label == 1), sorted(list(df_toniot.Attack.unique().astype(str)))))
-
-    print("-------------Rebalanceo----------------")
-    # Rebalanceo de los dataframes
-    df_cic = rebalance_dataframe(df_cic)
-    df_nb15 = rebalance_dataframe(df_nb15)
-    df_toniot = rebalance_dataframe(df_toniot)
-   
-    print(">> \033[1m {} \033[0m - Total samples: {}, Benign: {}, Malicious: {}, Labels: {}"\
-        .format(path1, df_cic.shape[0], sum(df_cic.Label == 0), \
-        sum(df_cic.Label == 1), sorted(list(df_cic.Attack.unique().astype(str)))))
-    
-    print(">> \033[1m {} \033[0m - Total samples: {}, Benign: {}, Malicious: {}, Labels: {}"\
-        .format(path2, df_nb15.shape[0], sum(df_nb15.Label == 0), \
-        sum(df_nb15.Label == 1), sorted(list(df_nb15.Attack.unique().astype(str)))))
-    
-    print(">> \033[1m {} \033[0m - Total samples: {}, Benign: {}, Malicious: {}, Labels: {}"\
-        .format(path3, df_toniot.shape[0], sum(df_toniot.Label == 0), \
-        sum(df_toniot.Label == 1), sorted(list(df_toniot.Attack.unique().astype(str)))))
-    
-    df_cic.to_csv('../datasets/balanced/cicids_balanced.csv', index=False)
-    df_nb15.to_csv('../datasets/balanced/nb15_balanced.csv', index=False)
-    df_toniot.to_csv('../datasets/balanced/toniot_balanced.csv', index=False)
+def balance(paths, save_paths, names):
+    df_total = load_and_combine_datasets(paths)
+    if df_total is None:
+        return
+    datasets = split_dataset(df_total)
+    save_datasets(datasets, save_paths)
+    print_label_distribution(datasets, names)
 
 if __name__ == "__main__":
-    balance()
+    paths = ["../datasets/sampled/cicids_sampled.csv", "../datasets/sampled/nb15_sampled.csv", "../datasets/sampled/toniot_sampled.csv"]
+    save_paths = ['../datasets/balanced/first_balanced.csv', '../datasets/balanced/second_balanced.csv', '../datasets/balanced/third_balanced.csv']
+    names = ["primero", "segundo", "tercero"]
+    balance(paths, save_paths, names)

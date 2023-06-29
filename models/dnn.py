@@ -1,11 +1,11 @@
 import tensorflow as tf
 from keras.models import Model, load_model
 from keras.layers import Input, Dropout, Dense, Lambda
+from tensorflow.keras.optimizers import SGD
 from tensorflow.keras import optimizers
-from tensorflow.keras import backend as K
 
-MSE = "mean_squared_error"
 bcentr = "binary_crossentropy"
+learning_rate = 0.001
 
 def create_NN(num_features):
     """
@@ -13,28 +13,16 @@ def create_NN(num_features):
     """
     model = tf.keras.models.Sequential([
         Input(shape=(num_features,)),
-        Dense(12, activation='relu'),
-        Dropout(0.2),
-        Dense(6, activation='relu'),
-        Dropout(0.2),
-        Dense(3, activation='relu'),
-        Dropout(0.2),
+        Dense(256, activation='relu'),
+        Dropout(0.3),
+        Dense(256, activation='relu'),
+        Dropout(0.3),
+        Dense(128, activation='relu'),
+        Dropout(0.3),
         Dense(1, activation='sigmoid')
     ])
-    model.compile(optimizer="adam", loss=bcentr, metrics=['accuracy'])
 
-    # model = tf.keras.models.Sequential([
-    #     Input(shape=(num_features,)),
-    #     Dense(32, activation='relu'),
-    #     Dense(16, activation='relu'),
-    #     Dense(8, activation='relu'),
-    #     Dense(4, activation='relu'),
-    #     Dense(8, activation='relu'),
-    #     Dense(16, activation='relu'),
-    #     Dense(32, activation='relu'),
-    #     Dense(num_features, activation='sigmoid')
-    # ])
-    
-    # model.compile(optimizer="adam", loss=MSE)
-    
+    optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+    model.compile(optimizer=optimizer, loss=bcentr, metrics=['accuracy'])
+
     return model

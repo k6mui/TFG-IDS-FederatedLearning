@@ -1,0 +1,3 @@
+[submodule "flower"]
+	path = flower
+	url = https://github.com/adap/flower.git

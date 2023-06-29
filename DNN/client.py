@@ -11,7 +11,7 @@ from models import dnn
 from server import eval_learning
 
 # External IP of VM Instance
-serverAdress = ""  # e.g. 34.125.18.50
+serverAdress = ""  # e.g. "34.125.18.50"
 
 # Make TensorFlow logs less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"

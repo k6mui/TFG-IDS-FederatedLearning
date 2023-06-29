@@ -13,7 +13,8 @@ import regUtils
 
 
 # Ip of the central Server
-serverAdress = "Internal IP of VM instances"
+serverAdress = "Internal IP of VM instances" # e.g. "10.182.0.3"
+
 # Number of features 
 NUM_FEATURES = 39
 

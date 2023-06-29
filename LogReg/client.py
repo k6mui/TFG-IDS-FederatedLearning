@@ -12,7 +12,7 @@ import regUtils
 from utils import load_datasets
 
 # External IP of VM Instance
-serverAdress = ""  # e.g. 34.125.18.50
+serverAdress = ""  # e.g. "34.125.18.50"
 
 class FlwrClient(fl.client.NumPyClient):
     # Implement flower client extending class NumPyClient

@@ -5,6 +5,7 @@ This repository contains the necessary code to conduct the Final Degree Project 
 
 ## 2. Installation "Setup"
 To install the required dependencies, run the following command:
+
 ```pip install -r requirements.txt```
 
 ## 3. Project Preparation
@@ -29,6 +30,14 @@ To launch the project, you will need to run the `server.py` file in the cloud, w
 The command has a parameter that can be '1', '2' or '3' depending on the client you want to launch, as each one will represent one of the different datasets. The command should be in the form of `python3 client.py 1`, `python3 client.py 2` or `python3 client.py 3`. You can launch any combination of clients, and you can launch the same one repeatedly.
 Run the following commands as per your needs:
 
+(cloud server)
+`python3 server.py` 
+
+(personal laptop)
+```
+python3 client.py 1
+python3 client.py 2
+python3 client.py 3```
 
 
 

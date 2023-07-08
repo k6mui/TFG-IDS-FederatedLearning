@@ -5,7 +5,7 @@ This repository contains the necessary code to conduct the Final Degree Project 
 
 ## 2. Installation "Setup"
 To install the required dependencies, run the following command:
-pip install -r requirements.txt
+```pip install -r requirements.txt```
 
 ## 3. Project Preparation
 Go to the `./datasets` directory and follow the instructions provided there to acquire the project's starting datasets: NF-UNSW-NB15-v2, NF-ToN-IoT-v2, and NF-CSE-CIC-IDS2018-v2.

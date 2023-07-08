@@ -31,13 +31,11 @@ The command has a parameter that can be '1', '2' or '3' depending on the client 
 Run the following commands as per your needs:
 
 (cloud server)
+
 `python3 server.py` 
 
 (personal laptop)
 ```
 python3 client.py 1
 python3 client.py 2
-python3 client.py 3```
-
-
-
+python3 client.py 3

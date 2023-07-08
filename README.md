@@ -5,7 +5,7 @@ This repository contains the necessary code to conduct the Final Degree Project 
 
 ## 2. Installation "Setup"
 To install the required dependencies, run the following command:
-
+pip install -r requirements.txt
 
 ## 3. Project Preparation
 Go to the `./datasets` directory and follow the instructions provided there to acquire the project's starting datasets: NF-UNSW-NB15-v2, NF-ToN-IoT-v2, and NF-CSE-CIC-IDS2018-v2.
@@ -19,12 +19,9 @@ Go to the `./datasets` directory and follow the instructions provided there to a
 6. Go to "Configure Firewall Rules".
 7. Add two rules that allow both incoming and outgoing traffic for the TCP protocol on port 4687 (or any other port where you wish to launch the server).
 8. Install the project repository on the virtual machine: git clone https://github.com/k6mui/TFG-IDS-FederatedLearning.git
-
-9. Install the project dependencies: pip install -r requirements.txt
-
-10. Modify the `server.py` file, entering the internal IP of the virtual machine in the "serverAdress" variable.
-11. Repeat steps 8 and 9 on the machine where you wish to launch the clients.
-12. Enter the external IP of the virtual machine in the "server_address" variable.
+9. Modify the `server.py` file, entering the internal IP of the virtual machine in the "serverAdress" variable.
+10. Repeat steps 8 and 9 on the machine where you wish to launch the clients.
+11. Enter the external IP of the virtual machine in the "server_address" variable.
 
 ## 6. Launch the Project
 To launch the project, you will need to run the `server.py` file in the cloud, within the directory with the name of the model you want to launch, and do the same with the `client.py` file on the machine. The project is set up so that training does not start until three instances of `client.py` have been launched.
